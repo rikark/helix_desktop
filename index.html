@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html>
+<head>
+<style>
+    #canvas-container {
+        position: relative;
+        left: -70%;  /* Adjust as needed */
+        top: -50px;  /* Move the container up by 50 pixels */
+        transform: rotate(45deg) scale(0.5);
+    }
+
+    body {
+        overflow-x: hidden;  /* Prevents horizontal scroll bar */
+    }
+
+</style>
+</head>
+<body>
+    <div id="canvas-container">
+        <canvas id="helixCanvas"></canvas>
+    </div>
+
+    <script>
+        var canvasEl = document.getElementById('helixCanvas');
+
+        var unit = 380;
+        var canvas, ctx, height, width, xAxis, yAxis, draw;
+
+        var ballWeight = 8;
+        var lineWeight = 3.4;
+        var lineFreq = 70;
+        var rotationSpeed = 0.0045;
+
+        function init() {
+            canvas = canvasEl;
+            if (!canvas) return;
+            canvas.width = 3400;
+            canvas.height = 1000;
+            ctx = canvas.getContext("2d");
+            height = canvas.height;
+            width = canvas.width;
+            xAxis = 400;
+            yAxis = 0;
+            ctx.save();
+            draw();
+        }
+
+        draw = function () {
+            ctx.clearRect(0, 0, width, height);
+
+            drawSine(draw.t);
+            drawSine(draw.t, true);
+
+            drawLines(draw.t);
+
+            draw.seconds = draw.seconds - 0.002;
+            draw.t = draw.seconds * Math.PI;
+            requestAnimationFrame(draw);
+        };
+        draw.seconds = 0;
+        draw.t = 1;
+
+        function drawSine(t, isNegative = false) {
+            ctx.strokeStyle = "#ddd";
+            ctx.fillStyle = "#fff";
+            ctx.lineWidth = 3;
+            ctx.beginPath();
+
+            var x = t;
+            var y = isNegative ? Math.sin(-x) : Math.sin(x);
+
+            ctx.moveTo(yAxis, unit * y + xAxis);
+            for (i = yAxis; i <= width; i += 10) {
+                x = t + (-yAxis + i) / unit * 1.45;
+                y = isNegative ? Math.sin(-x) : Math.sin(x);
+                ctx.lineTo(i, unit * y + xAxis);
+            }
+            ctx.stroke();
+        }
+
+        function drawLines(t) {
+            ctx.fillStyle = "#fff";
+            for (let i = yAxis; i <= width; i += 140) {
+                ctx.lineWidth = 1;
+                ctx.beginPath();
+
+                var x = t + (-yAxis + i) / unit * 1.45;
+                var y1 = unit * Math.sin(x) + xAxis;
+                var y2 = unit * Math.sin(-x) + xAxis;
+
+                ctx.moveTo(i, y1);
+                ctx.lineTo(i, y2);
+                ctx.stroke();
+                drawCircles(i, x, y1, y2);
+            }
+        }
+
+        function drawCircles(i, x, y1, y2) {
+            ctx.lineWidth = 0;
+            ctx.beginPath();
+            ctx.arc(i, y1, ballWeight - Math.cos(x) * 3, 0, 2 * Math.PI);
+            ctx.fill();
+            ctx.stroke();
+
+
+            ctx.beginPath();
+            ctx.arc(i, y2, ballWeight + (Math.cos(x)) * 3, 0, 2 * Math.PI);
+            ctx.fill();
+            ctx.stroke();
+        }
+
+        init();
+    </script>
+</body>
+</html>
